@@ -61,7 +61,20 @@ const statusStyles: Record<ReportStatus, string> = {
   rejected: "bg-destructive/10 text-destructive border-destructive/30",
 };
 
-const categories = ["Electronics", "Documents", "Keys", "Bags", "Jewelry", "Pets", "Clothing", "Other"];
+const categories = [
+  "Keys / Keychain",
+  "Mobile Phone",
+  "Laptop",
+  "Wallet / Purse",
+  "ID Cards / Documents",
+  "Bags / Backpack",
+  "Jewelry / Watch",
+  "Earphones / Headphones",
+  "Books / Notebook",
+  "Clothing",
+  "Pets",
+  "Other",
+];
 
 const defaultReport = {
   report_type: "lost" as ReportType,
