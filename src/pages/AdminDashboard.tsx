@@ -21,6 +21,21 @@ const statusStyles: Record<ReportStatus, string> = {
   rejected: "bg-destructive/10 text-destructive border-destructive/30",
 };
 
+const categoryOptions = [
+  "Keys / Keychain",
+  "Mobile Phone",
+  "Laptop",
+  "Wallet / Purse",
+  "ID Cards / Documents",
+  "Bags / Backpack",
+  "Jewelry / Watch",
+  "Earphones / Headphones",
+  "Books / Notebook",
+  "Clothing",
+  "Pets",
+  "Other",
+];
+
 const AdminDashboard = () => {
   const { toast } = useToast();
   const [session, setSession] = useState<Session | null>(null);
@@ -61,7 +76,10 @@ const AdminDashboard = () => {
     resolved: adminReports.filter((report) => report.status === "resolved").length,
   }), [adminReports]);
 
-  const categories = useMemo(() => Array.from(new Set(adminReports.map((report) => report.category))).sort(), [adminReports]);
+  const categories = useMemo(
+    () => Array.from(new Set([...categoryOptions, ...adminReports.map((report) => report.category)])).sort(),
+    [adminReports],
+  );
 
   const filteredReports = useMemo(
     () => categoryFilter === "all" ? adminReports : adminReports.filter((report) => report.category === categoryFilter),
