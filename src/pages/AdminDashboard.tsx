@@ -203,7 +203,7 @@ const AdminDashboard = () => {
               <ShieldCheck className="h-6 w-6" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-sm font-bold uppercase tracking-wider text-primary">FindBridge Admin</p>
+              <p className="text-sm font-bold uppercase tracking-wider text-primary">ReclaimIt Admin</p>
               <h1 className="text-2xl font-black tracking-tight">Admin Dashboard</h1>
             </div>
           </div>

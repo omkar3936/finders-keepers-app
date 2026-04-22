@@ -175,7 +175,7 @@ const Index = () => {
             });
 
       if (result.error) throw result.error;
-      toast({ title: authMode === "signin" ? "Welcome back" : "Check your email", description: "Your secure lost and found desk is ready." });
+      toast({ title: authMode === "signin" ? "Welcome back to ReclaimIt" : "Check your email", description: "Your ReclaimIt lost and found workspace is ready." });
     } catch (error) {
       toast({ title: "Authentication failed", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
     } finally {
@@ -353,8 +353,8 @@ const Index = () => {
               <Compass className="h-6 w-6" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-sm font-bold uppercase tracking-wider text-primary">FindBridge</p>
-              <h1 className="text-2xl font-black tracking-tight">Lost & Found Desk</h1>
+              <p className="text-sm font-bold uppercase tracking-wider text-primary">ReclaimIt</p>
+              <h1 className="text-2xl font-black tracking-tight">Lost & Found Web Application</h1>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3">

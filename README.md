@@ -1,3 +1,3 @@
-# Welcome to your Lovable project
+# ReclaimIt – Lost & Found Web Application
 
-TODO: Document your project here
+ReclaimIt is a lost and found web application for reporting, verifying, and resolving missing item cases.
