@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { z } from "zod";
 import {
   ArchiveRestore,
@@ -15,6 +16,7 @@ import {
   ShieldCheck,
   Sparkles,
   UploadCloud,
+  type LucideIcon,
 } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
@@ -87,9 +89,7 @@ const Index = () => {
   const [submitting, setSubmitting] = useState(false);
   const [reports, setReports] = useState<ReportWithImage[]>([]);
   const [myReports, setMyReports] = useState<ReportWithImage[]>([]);
-  const [adminReports, setAdminReports] = useState<ReportWithImage[]>([]);
   const [loadingReports, setLoadingReports] = useState(false);
-  const [adminDraft, setAdminDraft] = useState<Record<string, { status: ReportStatus; solution: string; admin_notes: string }>>({});
 
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, currentSession) => {
@@ -106,7 +106,6 @@ const Index = () => {
       setIsAdmin(false);
       setReports([]);
       setMyReports([]);
-      setAdminReports([]);
       return;
     }
 
@@ -120,13 +119,13 @@ const Index = () => {
   }, [session?.user?.id]);
 
   const stats = useMemo(() => {
-    const all = isAdmin ? adminReports : [...reports, ...myReports];
+    const all = [...reports, ...myReports];
     return {
       active: all.filter((report) => report.status === "verified" || report.status === "matched").length,
       pending: all.filter((report) => report.status === "pending").length,
       resolved: all.filter((report) => report.status === "resolved").length,
     };
-  }, [adminReports, isAdmin, myReports, reports]);
+  }, [myReports, reports]);
 
   const signUrls = async (items: ItemReport[]): Promise<ReportWithImage[]> => {
     return Promise.all(
@@ -157,21 +156,6 @@ const Index = () => {
       setReports(await signUrls(publicData ?? []));
       setMyReports(await signUrls(ownData ?? []));
 
-      if (roleData) {
-        const { data: allData } = await supabase.from("item_reports").select("*").order("created_at", { ascending: false }).limit(60);
-        const signed = await signUrls(allData ?? []);
-        setAdminReports(signed);
-        setAdminDraft(
-          signed.reduce<Record<string, { status: ReportStatus; solution: string; admin_notes: string }>>((acc, report) => {
-            acc[report.id] = {
-              status: report.status,
-              solution: report.solution ?? "",
-              admin_notes: report.admin_notes ?? "",
-            };
-            return acc;
-          }, {}),
-        );
-      }
     } finally {
       setLoadingReports(false);
     }
@@ -250,34 +234,11 @@ const Index = () => {
     }
   };
 
-  const updateReport = async (report: ItemReport) => {
-    if (!session?.user || !adminDraft[report.id]) return;
-    const draft = adminDraft[report.id];
-    const { error } = await supabase
-      .from("item_reports")
-      .update({
-        status: draft.status,
-        solution: draft.solution.trim() || null,
-        admin_notes: draft.admin_notes.trim() || null,
-        verified_by: draft.status === "verified" || draft.status === "matched" || draft.status === "resolved" ? session.user.id : report.verified_by,
-        verified_at: draft.status === "verified" || draft.status === "matched" || draft.status === "resolved" ? new Date().toISOString() : report.verified_at,
-      })
-      .eq("id", report.id);
-
-    if (error) {
-      toast({ title: "Update failed", description: error.message, variant: "destructive" });
-      return;
-    }
-
-    toast({ title: "Report updated", description: "Verification status and solution were saved." });
-    await loadRoleAndReports();
-  };
-
   const signOut = async () => {
     await supabase.auth.signOut();
   };
 
-  const renderReportCard = (report: ReportWithImage, adminMode = false) => (
+  const renderReportCard = (report: ReportWithImage) => (
     <article key={report.id} className="group overflow-hidden rounded-lg border bg-card shadow-card transition-all hover:-translate-y-1 hover:shadow-soft">
       <div className="grid gap-0 md:grid-cols-[210px_1fr]">
         <div className="relative min-h-44 bg-muted">
@@ -313,34 +274,6 @@ const Index = () => {
             <span className="rounded-full bg-muted px-3 py-1">{report.event_date || "Date not specified"}</span>
             <span className="rounded-full bg-muted px-3 py-1">Contact: {report.contact_name}</span>
           </div>
-          {adminMode && adminDraft[report.id] && (
-            <div className="grid gap-3 border-t pt-4 md:grid-cols-[160px_1fr_1fr_auto]">
-              <Select
-                value={adminDraft[report.id].status}
-                onValueChange={(value: ReportStatus) => setAdminDraft((draft) => ({ ...draft, [report.id]: { ...draft[report.id], status: value } }))}
-              >
-                <SelectTrigger aria-label="Report status">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {(["pending", "verified", "matched", "resolved", "rejected"] as ReportStatus[]).map((status) => (
-                    <SelectItem key={status} value={status}>{status}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Input
-                value={adminDraft[report.id].solution}
-                placeholder="Solution for reporter"
-                onChange={(event) => setAdminDraft((draft) => ({ ...draft, [report.id]: { ...draft[report.id], solution: event.target.value } }))}
-              />
-              <Input
-                value={adminDraft[report.id].admin_notes}
-                placeholder="Internal admin notes"
-                onChange={(event) => setAdminDraft((draft) => ({ ...draft, [report.id]: { ...draft[report.id], admin_notes: event.target.value } }))}
-              />
-              <Button variant="trust" onClick={() => updateReport(report)}>Save</Button>
-            </div>
-          )}
         </div>
       </div>
     </article>
@@ -365,7 +298,7 @@ const Index = () => {
                 [ArchiveRestore, "Report", "Lost or found"],
                 [BadgeCheck, "Verify", "Admin checked"],
                 [CheckCircle2, "Resolve", "Safe handoff"],
-              ].map(([Icon, title, label]) => (
+              ].map(([Icon, title, label]: [LucideIcon, string, string]) => (
                 <div key={String(title)} className="rounded-lg border bg-card p-4 shadow-card transition-transform hover:-translate-y-1">
                   <Icon className="mb-4 h-6 w-6 text-primary" aria-hidden="true" />
                   <p className="font-bold">{String(title)}</p>
@@ -425,7 +358,11 @@ const Index = () => {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            {isAdmin && <span className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-sm font-bold text-primary">Admin</span>}
+            {isAdmin && (
+              <Button asChild variant="trust">
+                <Link to="/admin"><ShieldCheck className="h-4 w-4" aria-hidden="true" /> Admin dashboard</Link>
+              </Button>
+            )}
             <Button variant="trust" onClick={signOut}><LogOut className="h-4 w-4" aria-hidden="true" /> Sign out</Button>
           </div>
         </div>
@@ -437,7 +374,7 @@ const Index = () => {
             [Search, stats.active, "Active verified cases"],
             [Clock3, stats.pending, "Awaiting verification"],
             [ClipboardCheck, stats.resolved, "Resolved handoffs"],
-          ].map(([Icon, value, label]) => (
+          ].map(([Icon, value, label]: [LucideIcon, number, string]) => (
             <div key={String(label)} className="rounded-lg border bg-card p-5 shadow-card">
               <Icon className="mb-4 h-6 w-6 text-primary" aria-hidden="true" />
               <p className="text-3xl font-black">{String(value)}</p>
@@ -447,10 +384,9 @@ const Index = () => {
         </div>
 
         <Tabs defaultValue="report" className="space-y-6">
-          <TabsList className="grid h-auto w-full grid-cols-3 bg-muted p-1 md:w-auto">
+          <TabsList className="grid h-auto w-full grid-cols-2 bg-muted p-1 md:w-auto">
             <TabsTrigger value="report">Report</TabsTrigger>
             <TabsTrigger value="browse">Browse</TabsTrigger>
-            <TabsTrigger value="admin" disabled={!isAdmin}>Admin</TabsTrigger>
           </TabsList>
 
           <TabsContent value="report" className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
@@ -536,20 +472,6 @@ const Index = () => {
                 <Search className="mx-auto mb-4 h-10 w-10 text-primary" aria-hidden="true" />
                 <p className="font-bold">No verified reports yet</p>
                 <p className="text-sm text-muted-foreground">Admin-approved reports will appear here for safe matching.</p>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="admin" className="space-y-4">
-            <div>
-              <h2 className="text-2xl font-black">Admin verification queue</h2>
-              <p className="text-sm text-muted-foreground">Verify reports, mark matches, reject duplicates, and provide the final solution.</p>
-            </div>
-            {adminReports.length ? adminReports.map((report) => renderReportCard(report, true)) : (
-              <div className="rounded-lg border bg-card p-8 text-center shadow-card">
-                <ShieldCheck className="mx-auto mb-4 h-10 w-10 text-primary" aria-hidden="true" />
-                <p className="font-bold">No admin reports available</p>
-                <p className="text-sm text-muted-foreground">New submissions will appear here once users report items.</p>
               </div>
             )}
           </TabsContent>
