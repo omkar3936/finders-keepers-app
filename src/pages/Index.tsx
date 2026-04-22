@@ -307,7 +307,9 @@ const Index = () => {
   if (!session) {
     return (
       <main className="min-h-screen overflow-hidden bg-soft-gradient">
-        <section className="container grid min-h-screen items-center gap-10 py-8 lg:grid-cols-[1.05fr_0.95fr]">
+        <section className="container relative grid min-h-screen items-center gap-10 py-8 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="pointer-events-none absolute left-1/2 top-16 -z-10 h-72 w-72 -translate-x-1/2 rounded-full bg-hero-gradient opacity-15 blur-3xl" />
+          <div className="pointer-events-none absolute bottom-20 right-8 -z-10 h-56 w-56 rounded-full bg-secondary opacity-20 blur-3xl" />
           <div className="animate-fade-up space-y-8">
             <div className="inline-flex items-center gap-2 rounded-full border bg-surface px-4 py-2 text-sm font-semibold text-primary shadow-card">
               <ShieldCheck className="h-4 w-4" aria-hidden="true" /> Verified community recovery desk
@@ -317,6 +319,17 @@ const Index = () => {
               <p className="max-w-2xl text-lg leading-8 text-muted-foreground">
                 Report lost or found items with photos, track verification, and let admins coordinate safe solutions from one trusted workspace.
               </p>
+            </div>
+            <div className="grid max-w-2xl gap-3 sm:grid-cols-3">
+              {heroHighlights.map(({ icon: Icon, label, status }) => (
+                <div key={label} className="group rounded-lg border bg-surface/90 p-4 shadow-card transition-all hover:-translate-y-1 hover:bg-card hover:shadow-soft">
+                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary transition-transform group-hover:scale-110">
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                  </div>
+                  <p className="font-bold">{label}</p>
+                  <p className="text-sm text-muted-foreground">{status}</p>
+                </div>
+              ))}
             </div>
             <div className="grid max-w-2xl gap-3 sm:grid-cols-3">
               {([
@@ -334,6 +347,30 @@ const Index = () => {
           </div>
           <div className="relative animate-fade-up lg:justify-self-end">
             <div className="absolute -inset-6 -z-10 animate-float-map rounded-full bg-hero-gradient opacity-20 blur-3xl" />
+            <div className="mb-4 hidden rounded-lg border bg-card/95 p-4 shadow-card md:block">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-bold text-primary">Live recovery board</p>
+                  <p className="text-xs text-muted-foreground">Recent community activity</p>
+                </div>
+                <PackageSearch className="h-6 w-6 text-secondary" aria-hidden="true" />
+              </div>
+              <div className="mt-4 space-y-3">
+                {[
+                  ["Keys / Keychain", "Found near main gate", "verified"],
+                  ["Mobile Phone", "Lost in cafeteria", "pending"],
+                  ["Backpack", "Ready for handoff", "resolved"],
+                ].map(([item, place, status]) => (
+                  <div key={item} className="flex items-center justify-between gap-3 rounded-md bg-muted/60 px-3 py-2 text-sm">
+                    <div>
+                      <p className="font-semibold">{item}</p>
+                      <p className="text-xs text-muted-foreground">{place}</p>
+                    </div>
+                    <span className="rounded-full bg-surface px-2 py-1 text-xs font-bold capitalize text-primary">{status}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
             <form onSubmit={handleAuth} className="rounded-lg border bg-card p-6 shadow-soft">
               <div className="mb-6 flex items-center justify-between gap-4">
                 <div>
