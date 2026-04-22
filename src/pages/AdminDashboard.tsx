@@ -155,7 +155,9 @@ const AdminDashboard = () => {
           <div className="flex flex-wrap gap-2 text-xs font-semibold text-muted-foreground">
             <span className="rounded-full bg-muted px-3 py-1">{report.category}</span>
             <span className="rounded-full bg-muted px-3 py-1">{report.event_date || "Date not specified"}</span>
-            <span className="rounded-full bg-muted px-3 py-1">Contact: {report.contact_name}</span>
+            <span className="rounded-full bg-muted px-3 py-1">Reporter: {report.contact_name}</span>
+            <span className="rounded-full bg-muted px-3 py-1">Phone: {report.contact_phone || "Not provided"}</span>
+            <span className="rounded-full bg-muted px-3 py-1">Email: {report.contact_email || "Not provided"}</span>
           </div>
           {adminDraft[report.id] && (
             <div className="grid gap-3 border-t pt-4 md:grid-cols-[160px_1fr_1fr_auto]">
