@@ -294,11 +294,11 @@ const Index = () => {
               </p>
             </div>
             <div className="grid max-w-2xl gap-3 sm:grid-cols-3">
-              {[
+              {([
                 [ArchiveRestore, "Report", "Lost or found"],
                 [BadgeCheck, "Verify", "Admin checked"],
                 [CheckCircle2, "Resolve", "Safe handoff"],
-              ].map(([Icon, title, label]: [LucideIcon, string, string]) => (
+              ] satisfies Array<[LucideIcon, string, string]>).map(([Icon, title, label]) => (
                 <div key={String(title)} className="rounded-lg border bg-card p-4 shadow-card transition-transform hover:-translate-y-1">
                   <Icon className="mb-4 h-6 w-6 text-primary" aria-hidden="true" />
                   <p className="font-bold">{String(title)}</p>
@@ -370,11 +370,11 @@ const Index = () => {
 
       <section className="container py-8">
         <div className="mb-8 grid gap-4 md:grid-cols-3">
-          {[
+          {([
             [Search, stats.active, "Active verified cases"],
             [Clock3, stats.pending, "Awaiting verification"],
             [ClipboardCheck, stats.resolved, "Resolved handoffs"],
-          ].map(([Icon, value, label]: [LucideIcon, number, string]) => (
+          ] satisfies Array<[LucideIcon, number, string]>).map(([Icon, value, label]) => (
             <div key={String(label)} className="rounded-lg border bg-card p-5 shadow-card">
               <Icon className="mb-4 h-6 w-6 text-primary" aria-hidden="true" />
               <p className="text-3xl font-black">{String(value)}</p>
