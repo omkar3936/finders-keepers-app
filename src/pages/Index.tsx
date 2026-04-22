@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   Sparkles,
   UploadCloud,
+  type LucideIcon,
 } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
@@ -297,7 +298,7 @@ const Index = () => {
                 [ArchiveRestore, "Report", "Lost or found"],
                 [BadgeCheck, "Verify", "Admin checked"],
                 [CheckCircle2, "Resolve", "Safe handoff"],
-              ].map(([Icon, title, label]) => (
+              ].map(([Icon, title, label]: [LucideIcon, string, string]) => (
                 <div key={String(title)} className="rounded-lg border bg-card p-4 shadow-card transition-transform hover:-translate-y-1">
                   <Icon className="mb-4 h-6 w-6 text-primary" aria-hidden="true" />
                   <p className="font-bold">{String(title)}</p>
@@ -373,7 +374,7 @@ const Index = () => {
             [Search, stats.active, "Active verified cases"],
             [Clock3, stats.pending, "Awaiting verification"],
             [ClipboardCheck, stats.resolved, "Resolved handoffs"],
-          ].map(([Icon, value, label]) => (
+          ].map(([Icon, value, label]: [LucideIcon, number, string]) => (
             <div key={String(label)} className="rounded-lg border bg-card p-5 shadow-card">
               <Icon className="mb-4 h-6 w-6 text-primary" aria-hidden="true" />
               <p className="text-3xl font-black">{String(value)}</p>

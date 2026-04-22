@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import type { Session } from "@supabase/supabase-js";
-import { ArrowLeft, Camera, CheckCircle2, Clock3, Compass, LogOut, MapPin, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Camera, CheckCircle2, Clock3, Compass, LogOut, MapPin, ShieldCheck, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -230,7 +230,7 @@ const AdminDashboard = () => {
                 [Clock3, stats.pending, "Pending submissions"],
                 [ShieldCheck, stats.verified, "Verified or matched"],
                 [CheckCircle2, stats.resolved, "Resolved handoffs"],
-              ].map(([Icon, value, label]) => (
+              ].map(([Icon, value, label]: [LucideIcon, number, string]) => (
                 <div key={String(label)} className="rounded-lg border bg-card p-5 shadow-card">
                   <Icon className="mb-4 h-6 w-6 text-primary" aria-hidden="true" />
                   <p className="text-3xl font-black">{String(value)}</p>
