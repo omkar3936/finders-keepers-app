@@ -15,7 +15,6 @@ import {
   Search,
   ShieldCheck,
   Sparkles,
-  Trash2,
   UploadCloud,
   type LucideIcon,
 } from "lucide-react";
@@ -104,7 +103,6 @@ const Index = () => {
   const [reports, setReports] = useState<ReportWithImage[]>([]);
   const [myReports, setMyReports] = useState<ReportWithImage[]>([]);
   const [loadingReports, setLoadingReports] = useState(false);
-  const [deletingReportId, setDeletingReportId] = useState<string | null>(null);
 
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, currentSession) => {
@@ -253,23 +251,7 @@ const Index = () => {
     await supabase.auth.signOut();
   };
 
-  const deleteReport = async (report: ReportWithImage) => {
-    if (!session?.user || !window.confirm("Delete this report permanently?")) return;
-
-    setDeletingReportId(report.id);
-    try {
-      const { error } = await supabase.from("item_reports").delete().eq("id", report.id);
-      if (error) throw error;
-      toast({ title: "Report deleted", description: "The report has been removed." });
-      await loadRoleAndReports();
-    } catch (error) {
-      toast({ title: "Delete failed", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
-    } finally {
-      setDeletingReportId(null);
-    }
-  };
-
-  const renderReportCard = (report: ReportWithImage, canDelete = false) => (
+  const renderReportCard = (report: ReportWithImage) => (
     <article key={report.id} className="group overflow-hidden rounded-lg border bg-card shadow-card transition-all hover:-translate-y-1 hover:shadow-soft">
       <div className="grid gap-0 md:grid-cols-[210px_1fr]">
         <div className="relative min-h-44 bg-muted">
@@ -294,11 +276,6 @@ const Index = () => {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <span className={`rounded-full border px-3 py-1 text-xs font-bold capitalize ${statusStyles[report.status]}`}>{report.status}</span>
-              {canDelete && (
-                <Button variant="destructive" size="sm" onClick={() => deleteReport(report)} disabled={deletingReportId === report.id}>
-                  <Trash2 className="h-4 w-4" aria-hidden="true" /> {deletingReportId === report.id ? "Deleting" : "Delete"}
-                </Button>
-              )}
             </div>
           </div>
           <p className="text-sm leading-6 text-muted-foreground">{report.description}</p>
@@ -490,7 +467,7 @@ const Index = () => {
 
             <div className="space-y-4">
               <h2 className="text-2xl font-black">My reports</h2>
-              {loadingReports ? <p className="text-muted-foreground">Loading reports...</p> : myReports.length ? myReports.map((report) => renderReportCard(report, true)) : (
+              {loadingReports ? <p className="text-muted-foreground">Loading reports...</p> : myReports.length ? myReports.map((report) => renderReportCard(report)) : (
                 <div className="rounded-lg border bg-card p-8 text-center shadow-card">
                   <ArchiveRestore className="mx-auto mb-4 h-10 w-10 text-primary" aria-hidden="true" />
                   <p className="font-bold">No reports yet</p>
