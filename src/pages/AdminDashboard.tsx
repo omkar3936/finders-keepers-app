@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import type { Session } from "@supabase/supabase-js";
-import { ArrowLeft, Camera, CheckCircle2, Clock3, Compass, LogOut, MapPin, ShieldCheck, type LucideIcon } from "lucide-react";
+import { Camera, CheckCircle2, Clock3, Compass, LogOut, MapPin, ShieldCheck, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -206,9 +206,6 @@ const AdminDashboard = () => {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <Button asChild variant="ghost">
-              <Link to="/"><ArrowLeft className="h-4 w-4" aria-hidden="true" /> User desk</Link>
-            </Button>
             <Button variant="trust" onClick={signOut}><LogOut className="h-4 w-4" aria-hidden="true" /> Sign out</Button>
           </div>
         </div>
