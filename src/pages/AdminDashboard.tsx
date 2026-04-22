@@ -29,6 +29,7 @@ const AdminDashboard = () => {
   const [loadingReports, setLoadingReports] = useState(false);
   const [adminReports, setAdminReports] = useState<ReportWithImage[]>([]);
   const [adminDraft, setAdminDraft] = useState<Record<string, { status: ReportStatus; solution: string; admin_notes: string }>>({});
+  const [categoryFilter, setCategoryFilter] = useState("all");
 
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, currentSession) => {
@@ -59,6 +60,13 @@ const AdminDashboard = () => {
     verified: adminReports.filter((report) => report.status === "verified" || report.status === "matched").length,
     resolved: adminReports.filter((report) => report.status === "resolved").length,
   }), [adminReports]);
+
+  const categories = useMemo(() => Array.from(new Set(adminReports.map((report) => report.category))).sort(), [adminReports]);
+
+  const filteredReports = useMemo(
+    () => categoryFilter === "all" ? adminReports : adminReports.filter((report) => report.category === categoryFilter),
+    [adminReports, categoryFilter],
+  );
 
   const signUrls = async (items: ItemReport[]): Promise<ReportWithImage[]> => Promise.all(
     items.map(async (report) => {
@@ -239,15 +247,30 @@ const AdminDashboard = () => {
             </div>
 
             <div className="space-y-4">
-              <div>
-                <h2 className="text-2xl font-black">Submitted reports</h2>
-                <p className="text-sm text-muted-foreground">Verify reports, mark matches, reject duplicates, and provide the final solution.</p>
+              <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <h2 className="text-2xl font-black">Submitted reports</h2>
+                  <p className="text-sm text-muted-foreground">Verify reports, mark matches, reject duplicates, and provide the final solution.</p>
+                </div>
+                <div className="w-full md:w-64">
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger aria-label="Filter reports by category">
+                      <SelectValue placeholder="Filter by category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All categories</SelectItem>
+                      {categories.map((category) => (
+                        <SelectItem key={category} value={category}>{category}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              {adminReports.length ? adminReports.map(renderReportCard) : (
+              {filteredReports.length ? filteredReports.map(renderReportCard) : (
                 <div className="rounded-lg border bg-card p-8 text-center shadow-card">
                   <ShieldCheck className="mx-auto mb-4 h-10 w-10 text-primary" aria-hidden="true" />
                   <p className="font-bold">No submitted reports available</p>
-                  <p className="text-sm text-muted-foreground">New submissions will appear here once users report items.</p>
+                  <p className="text-sm text-muted-foreground">{adminReports.length ? "No reports match this category." : "New submissions will appear here once users report items."}</p>
                 </div>
               )}
             </div>
