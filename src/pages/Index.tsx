@@ -350,23 +350,23 @@ const Index = () => {
             <div className="mb-4 hidden rounded-lg border bg-card/95 p-4 shadow-card md:block">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-bold text-primary">Live recovery board</p>
-                  <p className="text-xs text-muted-foreground">Recent community activity</p>
+                  <p className="text-sm font-bold text-primary">Smart recovery flow</p>
+                  <p className="text-xs text-muted-foreground">Simple steps for safer handoffs</p>
                 </div>
                 <PackageSearch className="h-6 w-6 text-secondary" aria-hidden="true" />
               </div>
               <div className="mt-4 space-y-3">
                 {[
-                  ["Keys / Keychain", "Found near main gate", "verified"],
-                  ["Mobile Phone", "Lost in cafeteria", "pending"],
-                  ["Backpack", "Ready for handoff", "resolved"],
-                ].map(([item, place, status]) => (
-                  <div key={item} className="flex items-center justify-between gap-3 rounded-md bg-muted/60 px-3 py-2 text-sm">
+                  ["Photo proof", "Add clear item images for faster checking", "01"],
+                  ["Admin review", "Reports are checked before public browsing", "02"],
+                  ["Safe solution", "Verified details guide the final return", "03"],
+                ].map(([title, detail, step]) => (
+                  <div key={title} className="flex items-center gap-3 rounded-md bg-muted/60 px-3 py-2 text-sm">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface text-xs font-black text-primary">{step}</span>
                     <div>
-                      <p className="font-semibold">{item}</p>
-                      <p className="text-xs text-muted-foreground">{place}</p>
+                      <p className="font-semibold">{title}</p>
+                      <p className="text-xs text-muted-foreground">{detail}</p>
                     </div>
-                    <span className="rounded-full bg-surface px-2 py-1 text-xs font-bold capitalize text-primary">{status}</span>
                   </div>
                 ))}
               </div>
