@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
 import type { Session } from "@supabase/supabase-js";
-import { Camera, CheckCircle2, Clock3, Compass, LogOut, MapPin, ShieldCheck, type LucideIcon } from "lucide-react";
+import { Camera, CheckCircle2, Clock3, Compass, LogOut, MapPin, ShieldCheck, Trash2, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -45,6 +45,7 @@ const AdminDashboard = () => {
   const [adminReports, setAdminReports] = useState<ReportWithImage[]>([]);
   const [adminDraft, setAdminDraft] = useState<Record<string, { status: ReportStatus; solution: string; admin_notes: string }>>({});
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [deletingReportId, setDeletingReportId] = useState<string | null>(null);
 
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, currentSession) => {
@@ -148,6 +149,22 @@ const AdminDashboard = () => {
     await loadAdminReports();
   };
 
+  const deleteReport = async (report: ItemReport) => {
+    if (!window.confirm("Delete this report permanently?")) return;
+
+    setDeletingReportId(report.id);
+    try {
+      const { error } = await supabase.from("item_reports").delete().eq("id", report.id);
+      if (error) throw error;
+      toast({ title: "Report deleted", description: "The submitted report has been removed." });
+      await loadAdminReports();
+    } catch (error) {
+      toast({ title: "Delete failed", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
+    } finally {
+      setDeletingReportId(null);
+    }
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
@@ -175,7 +192,12 @@ const AdminDashboard = () => {
                 <MapPin className="h-4 w-4" aria-hidden="true" /> {report.location}
               </p>
             </div>
-            <span className={`rounded-full border px-3 py-1 text-xs font-bold capitalize ${statusStyles[report.status]}`}>{report.status}</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`rounded-full border px-3 py-1 text-xs font-bold capitalize ${statusStyles[report.status]}`}>{report.status}</span>
+              <Button variant="destructive" size="sm" onClick={() => deleteReport(report)} disabled={deletingReportId === report.id}>
+                <Trash2 className="h-4 w-4" aria-hidden="true" /> {deletingReportId === report.id ? "Deleting" : "Delete"}
+              </Button>
+            </div>
           </div>
           <p className="text-sm leading-6 text-muted-foreground">{report.description}</p>
           <div className="flex flex-wrap gap-2 text-xs font-semibold text-muted-foreground">
