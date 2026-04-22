@@ -226,11 +226,11 @@ const AdminDashboard = () => {
         ) : (
           <div className="space-y-8">
             <div className="grid gap-4 md:grid-cols-3">
-              {[
+              {([
                 [Clock3, stats.pending, "Pending submissions"],
                 [ShieldCheck, stats.verified, "Verified or matched"],
                 [CheckCircle2, stats.resolved, "Resolved handoffs"],
-              ].map(([Icon, value, label]: [LucideIcon, number, string]) => (
+              ] satisfies Array<[LucideIcon, number, string]>).map(([Icon, value, label]) => (
                 <div key={String(label)} className="rounded-lg border bg-card p-5 shadow-card">
                   <Icon className="mb-4 h-6 w-6 text-primary" aria-hidden="true" />
                   <p className="text-3xl font-black">{String(value)}</p>
