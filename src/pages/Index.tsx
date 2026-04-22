@@ -9,12 +9,16 @@ import {
   Clock3,
   ClipboardCheck,
   Compass,
+  Laptop,
   ImagePlus,
   LogOut,
   MapPin,
+  PackageSearch,
+  Phone,
   Search,
   ShieldCheck,
   Sparkles,
+  WalletCards,
   UploadCloud,
   type LucideIcon,
 } from "lucide-react";
@@ -87,6 +91,12 @@ const defaultReport = {
   contact_phone: "",
   contact_email: "",
 };
+
+const heroHighlights = [
+  { icon: Phone, label: "Mobile", status: "Matched near library" },
+  { icon: Laptop, label: "Laptop", status: "Awaiting owner proof" },
+  { icon: WalletCards, label: "Wallet", status: "Verified by admin" },
+] satisfies Array<{ icon: LucideIcon; label: string; status: string }>;
 
 const Index = () => {
   const { toast } = useToast();
