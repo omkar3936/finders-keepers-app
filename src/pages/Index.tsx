@@ -47,7 +47,7 @@ type ReportWithImage = ItemReport & { signedImageUrl?: string };
 
 const formatDateInputValue = (date: Date) => date.toISOString().split("T")[0];
 const maxReportDate = formatDateInputValue(new Date());
-const minReportDate = formatDateInputValue(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
+const minReportDate = formatDateInputValue(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000));
 
 const reportSchema = z.object({
   report_type: z.enum(["lost", "found"]),
