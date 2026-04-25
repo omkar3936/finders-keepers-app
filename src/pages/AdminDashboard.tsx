@@ -290,19 +290,24 @@ const AdminDashboard = () => {
           <div className="space-y-8">
             <div className="grid gap-4 md:grid-cols-3">
               {([
-                [Clock3, stats.pending, "Pending submissions"],
-                [ShieldCheck, stats.verified, "Verified or matched"],
-                [CheckCircle2, stats.resolved, "Resolved handoffs"],
-              ] satisfies Array<[LucideIcon, number, string]>).map(([Icon, value, label]) => (
-                <div key={String(label)} className="rounded-lg border bg-card p-5 shadow-card">
+                [Clock3, stats.pending, "Pending submissions", "pending"],
+                [ShieldCheck, stats.verified, "Verified or matched", "verified-matched"],
+                [CheckCircle2, stats.resolved, "Resolved handoffs", "resolved"],
+              ] satisfies Array<[LucideIcon, number, string, StatusFilter]>).map(([Icon, value, label, filter]) => (
+                <button
+                  key={String(label)}
+                  type="button"
+                  onClick={() => showStatusReports(filter)}
+                  className={`rounded-lg border bg-card p-5 text-left shadow-card transition-all hover:-translate-y-1 hover:shadow-soft ${statusFilter === filter ? "border-primary ring-2 ring-primary/20" : ""}`}
+                >
                   <Icon className="mb-4 h-6 w-6 text-primary" aria-hidden="true" />
                   <p className="text-3xl font-black">{String(value)}</p>
                   <p className="text-sm text-muted-foreground">{String(label)}</p>
-                </div>
+                </button>
               ))}
             </div>
 
-            <div className="space-y-4">
+            <div ref={reportsSectionRef} className="scroll-mt-6 space-y-4">
               <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                 <div>
                   <h2 className="text-2xl font-black">Submitted reports</h2>
