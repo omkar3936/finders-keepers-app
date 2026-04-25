@@ -45,12 +45,16 @@ type ReportType = Database["public"]["Enums"]["report_type"];
 
 type ReportWithImage = ItemReport & { signedImageUrl?: string };
 
+const formatDateInputValue = (date: Date) => date.toISOString().split("T")[0];
+const maxReportDate = formatDateInputValue(new Date());
+const minReportDate = formatDateInputValue(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
+
 const reportSchema = z.object({
   report_type: z.enum(["lost", "found"]),
   item_name: z.string().trim().min(2).max(120),
   category: z.string().trim().min(2).max(80),
   location: z.string().trim().min(2).max(160),
-  event_date: z.string().optional(),
+  event_date: z.string().optional().refine((date) => !date || (date >= minReportDate && date <= maxReportDate)),
   description: z.string().trim().min(10).max(1200),
   contact_name: z.string().trim().min(2).max(120),
   contact_phone: z.string().trim().max(40).optional(),
@@ -482,7 +486,7 @@ const Index = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="event_date">Date</Label>
-                  <Input id="event_date" type="date" value={form.event_date} onChange={(event) => setForm({ ...form, event_date: event.target.value })} />
+                  <Input id="event_date" type="date" min={minReportDate} max={maxReportDate} value={form.event_date} onChange={(event) => setForm({ ...form, event_date: event.target.value })} />
                 </div>
                 <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="description">Description</Label>
