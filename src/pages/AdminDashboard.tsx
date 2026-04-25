@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Navigate } from "react-router-dom";
 import type { Session } from "@supabase/supabase-js";
 import { Camera, CheckCircle2, Clock3, Compass, LogOut, MapPin, ShieldCheck, Trash2, type LucideIcon } from "lucide-react";
@@ -12,6 +12,7 @@ import type { Database } from "@/integrations/supabase/types";
 type ItemReport = Database["public"]["Tables"]["item_reports"]["Row"];
 type ReportStatus = Database["public"]["Enums"]["report_status"];
 type ReportWithImage = ItemReport & { signedImageUrl?: string };
+type StatusFilter = "all" | "pending" | "verified-matched" | "resolved";
 
 const statusStyles: Record<ReportStatus, string> = {
   pending: "bg-warning/20 text-warning-foreground border-warning/40",
@@ -45,7 +46,9 @@ const AdminDashboard = () => {
   const [adminReports, setAdminReports] = useState<ReportWithImage[]>([]);
   const [adminDraft, setAdminDraft] = useState<Record<string, { status: ReportStatus; solution: string; admin_notes: string }>>({});
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [deletingReportId, setDeletingReportId] = useState<string | null>(null);
+  const reportsSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, currentSession) => {
@@ -83,9 +86,22 @@ const AdminDashboard = () => {
   );
 
   const filteredReports = useMemo(
-    () => categoryFilter === "all" ? adminReports : adminReports.filter((report) => report.category === categoryFilter),
-    [adminReports, categoryFilter],
+    () => adminReports.filter((report) => {
+      const matchesCategory = categoryFilter === "all" || report.category === categoryFilter;
+      const matchesStatus =
+        statusFilter === "all" ||
+        report.status === statusFilter ||
+        (statusFilter === "verified-matched" && (report.status === "verified" || report.status === "matched"));
+
+      return matchesCategory && matchesStatus;
+    }),
+    [adminReports, categoryFilter, statusFilter],
   );
+
+  const showStatusReports = (filter: StatusFilter) => {
+    setStatusFilter(filter);
+    reportsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const signUrls = async (items: ItemReport[]): Promise<ReportWithImage[]> => Promise.all(
     items.map(async (report) => {
@@ -274,19 +290,24 @@ const AdminDashboard = () => {
           <div className="space-y-8">
             <div className="grid gap-4 md:grid-cols-3">
               {([
-                [Clock3, stats.pending, "Pending submissions"],
-                [ShieldCheck, stats.verified, "Verified or matched"],
-                [CheckCircle2, stats.resolved, "Resolved handoffs"],
-              ] satisfies Array<[LucideIcon, number, string]>).map(([Icon, value, label]) => (
-                <div key={String(label)} className="rounded-lg border bg-card p-5 shadow-card">
+                [Clock3, stats.pending, "Pending submissions", "pending"],
+                [ShieldCheck, stats.verified, "Verified or matched", "verified-matched"],
+                [CheckCircle2, stats.resolved, "Resolved handoffs", "resolved"],
+              ] satisfies Array<[LucideIcon, number, string, StatusFilter]>).map(([Icon, value, label, filter]) => (
+                <button
+                  key={String(label)}
+                  type="button"
+                  onClick={() => showStatusReports(filter)}
+                  className={`rounded-lg border bg-card p-5 text-left shadow-card transition-all hover:-translate-y-1 hover:shadow-soft ${statusFilter === filter ? "border-primary ring-2 ring-primary/20" : ""}`}
+                >
                   <Icon className="mb-4 h-6 w-6 text-primary" aria-hidden="true" />
                   <p className="text-3xl font-black">{String(value)}</p>
                   <p className="text-sm text-muted-foreground">{String(label)}</p>
-                </div>
+                </button>
               ))}
             </div>
 
-            <div className="space-y-4">
+            <div ref={reportsSectionRef} className="scroll-mt-6 space-y-4">
               <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                 <div>
                   <h2 className="text-2xl font-black">Submitted reports</h2>
