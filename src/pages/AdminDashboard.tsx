@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Navigate } from "react-router-dom";
 import type { Session } from "@supabase/supabase-js";
 import { Camera, CheckCircle2, Clock3, Compass, LogOut, MapPin, ShieldCheck, Trash2, type LucideIcon } from "lucide-react";
@@ -12,6 +12,7 @@ import type { Database } from "@/integrations/supabase/types";
 type ItemReport = Database["public"]["Tables"]["item_reports"]["Row"];
 type ReportStatus = Database["public"]["Enums"]["report_status"];
 type ReportWithImage = ItemReport & { signedImageUrl?: string };
+type StatusFilter = "all" | "pending" | "verified-matched" | "resolved";
 
 const statusStyles: Record<ReportStatus, string> = {
   pending: "bg-warning/20 text-warning-foreground border-warning/40",
@@ -45,7 +46,9 @@ const AdminDashboard = () => {
   const [adminReports, setAdminReports] = useState<ReportWithImage[]>([]);
   const [adminDraft, setAdminDraft] = useState<Record<string, { status: ReportStatus; solution: string; admin_notes: string }>>({});
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [deletingReportId, setDeletingReportId] = useState<string | null>(null);
+  const reportsSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, currentSession) => {
@@ -83,9 +86,22 @@ const AdminDashboard = () => {
   );
 
   const filteredReports = useMemo(
-    () => categoryFilter === "all" ? adminReports : adminReports.filter((report) => report.category === categoryFilter),
-    [adminReports, categoryFilter],
+    () => adminReports.filter((report) => {
+      const matchesCategory = categoryFilter === "all" || report.category === categoryFilter;
+      const matchesStatus =
+        statusFilter === "all" ||
+        report.status === statusFilter ||
+        (statusFilter === "verified-matched" && (report.status === "verified" || report.status === "matched"));
+
+      return matchesCategory && matchesStatus;
+    }),
+    [adminReports, categoryFilter, statusFilter],
   );
+
+  const showStatusReports = (filter: StatusFilter) => {
+    setStatusFilter(filter);
+    reportsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const signUrls = async (items: ItemReport[]): Promise<ReportWithImage[]> => Promise.all(
     items.map(async (report) => {
